@@ -1,0 +1,106 @@
+import random
+import math
+
+# Calculate the number of attacking pairs
+def cost_function(board):
+    n = len(board)
+    cost = 0
+
+    for i in range(n):
+        for j in range(i + 1, n):
+
+            # Same row
+            if board[i] == board[j]:
+                cost += 1
+
+            # Same diagonal
+            elif abs(board[i] - board[j]) == abs(i - j):
+                cost += 1
+
+    return cost
+
+
+# Generate a random neighbouring state
+def generate_neighbor(board):
+    n = len(board)
+    neighbor = board.copy()
+
+    # Select a random column
+    col = random.randrange(n)
+
+    # Select a different row for its queen
+    new_row = random.randrange(n - 1)
+
+    if new_row >= neighbor[col]:
+        new_row += 1
+
+    neighbor[col] = new_row
+
+    return neighbor
+
+
+# Simulated Annealing algorithm
+def simulated_annealing(n=8):
+    # Step 1: Initialize a random board
+    board = [random.randrange(n) for _ in range(n)]
+
+    # Step 2: Set initial temperature and cooling rate
+    T = 100.0
+    cooling_rate = 0.99
+    min_temperature = 0.01
+    max_steps = 1000
+
+    # Step 3: Calculate initial cost
+    current_cost = cost_function(board)
+
+    print("Initial board:", board)
+    print("Initial cost:", current_cost)
+
+    # Step 4: Repeat until solution is found
+    while T > min_temperature and current_cost != 0:
+
+        for _ in range(max_steps):
+
+            # Stop if the solution is found
+            if current_cost == 0:
+                break
+
+            # Step 5: Generate a random neighbour
+            neighbor = generate_neighbor(board)
+
+            # Step 6: Calculate neighbour's cost
+            neighbor_cost = cost_function(neighbor)
+
+            # Step 7: Calculate cost difference
+            delta_E = neighbor_cost - current_cost
+
+            # Step 8: Decide whether to accept the neighbour
+            if delta_E < 0:
+                board = neighbor
+                current_cost = neighbor_cost
+
+            else:
+                probability = math.exp(-delta_E / T)
+
+                if random.random() < probability:
+                    board = neighbor
+                    current_cost = neighbor_cost
+
+        # Step 9: Reduce the temperature
+        T = T * cooling_rate
+
+    # Step 10: Display the result
+    if current_cost == 0:
+        print("\nSolution found!")
+        print("Final board:", board)
+        print("Final cost:", current_cost)
+    else:
+        print("\nSolution not found.")
+        print("Best board:", board)
+        print("Final cost:", current_cost)
+
+    return board
+
+
+# Main program
+simulated_annealing()
