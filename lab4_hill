@@ -1,0 +1,88 @@
+def cost_function(board):
+    n = len(board)
+    attacking_pairs = 0
+
+    # Check every pair of queens
+    for i in range(n):
+        for j in range(i + 1, n):
+
+            # Check if queens are in the same row
+            if board[i] == board[j]:
+                attacking_pairs += 1
+
+            # Check if queens are on the same diagonal
+            elif abs(board[i] - board[j]) == abs(i - j):
+                attacking_pairs += 1
+
+    return attacking_pairs
+
+
+def hill_climbing(board):
+    n = len(board)
+    current_cost = cost_function(board)
+
+    # Repeat until a solution is found
+    while current_cost != 0:
+
+        best_board = board.copy()
+        best_cost = current_cost
+
+        # Generate all neighbouring states
+        for i in range(n):
+            for j in range(i + 1, n):
+
+                # Create a copy of the current board
+                neighbor = board.copy()
+
+                # Swap the row positions of two queens
+                neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
+
+                # Calculate the cost of the neighbour
+                neighbor_cost = cost_function(neighbor)
+
+                # Select the neighbour with the lowest cost
+                if neighbor_cost < best_cost:
+                    best_cost = neighbor_cost
+                    best_board = neighbor.copy()
+
+        # Check whether an improvement is possible
+        if best_cost >= current_cost:
+            print("Local minimum reached!")
+            print("Current board:", board)
+            print("Current cost:", current_cost)
+            return None
+
+        # Move to the best neighbouring state
+        board = best_board
+        current_cost = best_cost
+
+        print("Current board:", board)
+        print("Current cost:", current_cost)
+
+    # Return the solution
+    return board
+
+
+# Main program
+n = int(input("Enter the number of queens: "))
+
+# Enter the initial board configuration
+board = []
+
+print("Enter the row position for each column (0 to", n - 1, "):")
+
+for i in range(n):
+    row = int(input("Column " + str(i) + ": "))
+    board.append(row)
+
+print("\nInitial board:", board)
+print("Initial cost:", cost_function(board))
+
+solution = hill_climbing(board)
+
+if solution is not None:
+    print("\nSolution found!")
+    print("Final board:", solution)
+    print("Final cost:", cost_function(solution))
+else:
+    print("\nNo solution found from this initial state.")
